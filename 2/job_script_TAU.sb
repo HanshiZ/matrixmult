@@ -1,0 +1,98 @@
+#!/bin/bash --login
+########## SBATCH Lines for Resource Request ##########
+
+# limit of wall clock time - how long the job will run (same as -t)
+# modify based on your need and the expected execution time
+#SBATCH --time=00:10:00
+
+# number of different nodes - could be an exact number or a range of nodes 
+#SBATCH --nodes=1
+
+# number of CPUs (or cores) per task (same as -c)
+# to allocate an entire intel-16 node, ask for all of the cores it has (28 in this case)
+#SBATCH --cpus-per-task=40          
+
+# use standard intel16 "laconia" nodes.
+#SBATCH --constraint=skl            
+
+# memory required per allocated  Node  - amount of memory (in bytes)
+#SBATCH --mem=70G                  
+
+#Send email notification to your MSU email when the job begins, ends, or is aborted by the scheduler.
+#SBATCH --mail-user=your-username@msu.edu   
+#SBATCH --mail-type=FAIL,BEGIN,END
+
+# you can give your job a name for easier identification (same as -J)
+#SBATCH --job-name hw2_tau     
+ 
+########## Command Lines to Run ##########
+
+module unload GNU OpenMPI
+module load GNU/6.4.0-2.28 OpenMPI/2.1.2
+export TAU_SET_NODE=0
+
+################################################################################
+# If you havent modified ".bashrc" for TAU, you can do the exporting here
+# otherwise you can remove this part
+
+# PAPI
+export PATH=/mnt/home/afibuzza/.local/papi/5.6.0/bin:$PATH
+export INCLUDE_PATH=/mnt/home/afibuzza/.local/papi/5.6.0/include:$INCLUDE_PATH
+export LD_LIBRARY_PATH=/mnt/home/afibuzza/.local/papi/5.6.0/lib:$LD_LIBRARY_PATH
+export MANPATH=/mnt/home/afibuzza/.local/papi/5.6.0/man:$MANPATH
+
+# TAU
+export PATH=/mnt/home/afibuzza/.local/tau/2.28/x86_64/bin:$PATH
+export INCLUDE_PATH=/mnt/home/afibuzza/.local/tau/2.28/include:$INCLUDE_PATH
+export LD_LIBRARY_PATH=/mnt/home/afibuzza/.local/tau/2.28/x86_64/lib:$LD_LIBRARY_PATH
+export TAU_MAKEFILE=/mnt/home/afibuzza/.local/tau/2.28/x86_64/lib/Makefile.tau-papi-mpi
+export TAU_OPTIONS=-optCompInst
+export TAU_METRICS=P_WALL_CLOCK_TIME:PAPI_L1_DCM:PAPI_L2_TCM:PAPI_L3_TCM
+
+################################################################################
+
+
+#
+# Change to the directory from which the job was submitted. In order for this to
+# work as intended, your job should be submitted from the directory in which you
+# want it to run.
+#
+cd ${SLURM_SUBMIT_DIR}
+#
+# Compile and run your code. The below option runs the compiled code in the test 
+# mode only. You can (and should) modify this part based on what kind of 
+# performance data you would like to collect (i.e., using the naive code for various 
+# matrix sizes, collecting cache utilization data using the TAU-instrumented version,
+# etc.)
+#
+
+# Once the script starts running, you can execute multiple commands sequentially
+
+# && is used to chain multiple commands in one line such that the second command will 
+# be executed only if the first command returns 0
+make multiplication-tau && ./multiplication-tau.x test input1.txt
+
+# since you need to save the timings to analyze later, you can direct the outputs 
+# (stdout and stderr) to a specified file
+
+# create a new folder to store auto-generated TAU folders and files
+# move the TAU folders to the newly created folder after the execution
+
+# commands below are intended to serve as examples. 
+# feel free to modify them, and add others as you deem necessary.
+
+
+mkdir TAU_1000_1000_100
+./multiplication-tau.x perf 1000 1000 100 >& ./TAU_1000_1000_100/results_TAU_1000_1000_100.txt
+mv MULTI__PAPI_L1_DCM ./TAU_1000_1000_100/
+mv MULTI__PAPI_L2_TCM ./TAU_1000_1000_100/
+mv MULTI__PAPI_L3_TCM ./TAU_1000_1000_100/
+mv MULTI__P_WALL_CLOCK_TIME ./TAU_1000_1000_100/
+
+mkdir TAU_10000_10000_100
+./multiplication-tau.x perf 10000 10000 100 >& ./TAU_10000_10000_100/results_TAU_10000_10000_100.txt
+mv MULTI__PAPI_L1_DCM ./TAU_10000_10000_100/
+mv MULTI__PAPI_L2_TCM ./TAU_10000_10000_100/
+mv MULTI__PAPI_L3_TCM ./TAU_10000_10000_100/
+mv MULTI__P_WALL_CLOCK_TIME ./TAU_10000_10000_100/
+
