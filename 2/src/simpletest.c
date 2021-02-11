@@ -1,3 +1,6 @@
+/* Change test to zero to avoid 2 mains*/
+#define TEST 1
+#if TEST
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -7,7 +10,7 @@
 #include "optMultiplication.h"
 #define TOL .00001
 
-const int k = 16; 
+const int k = 16;
 
 void asserteq(double * matrix, double * test, int size);
 void fill(double * matrix, int size);
@@ -39,7 +42,6 @@ int main(int argc, char * args[])
 
    naiveMultiplication(prod2, m1, m2 ,n,m);
    optMultiplication(prod1, t1, t2 , n ,m, b);
-
    asserteq(prod1,prod2,n*k);
    return 0;
 }
@@ -65,3 +67,4 @@ double uniform(double a , double b)
 {
     return (1.0 * rand() / RAND_MAX) * (b - a) + a;
 }
+#endif
