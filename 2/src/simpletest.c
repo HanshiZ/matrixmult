@@ -7,6 +7,7 @@
 #include "optMultiplication.h"
 #define TOL .00001
 
+const int k = 16; 
 
 void asserteq(double * matrix, double * test, int size);
 void fill(double * matrix, int size);
@@ -24,7 +25,6 @@ int main(int argc, char * args[])
    int n = atoi(*(args+1));
    int m = atoi(*(args+2));
    int b = *(args+3) ? atoi(*(args+3)) : 10;
-   int k = 16;
 
    double* prod1 = (double*)calloc(n*k, sizeof(double));
    double* prod2 = (double*)calloc(n*k, sizeof(double));
@@ -36,9 +36,9 @@ int main(int argc, char * args[])
 
    fill(m1, n * m), fill(m2, m*k);
    memcpy(t1, m1, sizeof(double) * n *m), memcpy(t2,m2, sizeof(double)*m*k);
-   
+
    naiveMultiplication(prod2, m1, m2 ,n,m);
-   optMultiplication(prod1, t1, t2 , n ,m, k);
+   optMultiplication(prod1, t1, t2 , n ,m, b);
 
    asserteq(prod1,prod2,n*k);
    return 0;
