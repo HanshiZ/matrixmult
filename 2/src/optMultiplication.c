@@ -1,6 +1,14 @@
+/*
+ Hanshi Z and Jacob Z
+*/
+
 #include "optMultiplication.h"
 #define NVEC 16
 
+/*
+  Divide the columns into B blocks and then do the computations to avoid
+  cache misses
+*/
 void optMultiplication(double* output, double* input_matrix, double* input_vector,int N,int M,int B)
 {
     /* I believe this is the wanted implementation */
