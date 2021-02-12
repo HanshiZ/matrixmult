@@ -1,6 +1,6 @@
 /* Change test to zero to avoid 2 mains*/
 #define TEST 1
-#if TEST
+
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -9,7 +9,7 @@
 #include "naiveMultiplication.h"
 #include "optMultiplication.h"
 #define TOL .00001
-
+#if TEST
 const int k = 16;
 
 void asserteq(double * matrix, double * test, int size);
